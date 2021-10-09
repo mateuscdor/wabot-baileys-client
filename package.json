@@ -4,12 +4,21 @@
   "description": "",
   "main": "index.js",
   "scripts": {
-    "test": "echo \"Error: no test specified\" && exit 1"
+    "test": "echo \"Error: no test specified\" && exit 1",
+    "dev": "node --inspect -r ts-node/register ./src/index.ts"
   },
   "keywords": [],
   "author": "",
   "license": "ISC",
   "dependencies": {
-    "@adiwajshing/baileys": "github:adiwajshing/baileys"
+    "@adiwajshing/baileys": "github:adiwajshing/baileys",
+    "@adiwajshing/baileys-md": "github:adiwajshing/baileys#multi-device",
+    "axios": "^0.22.0",
+    "dotenv": "^10.0.0",
+    "typescript": "^4.4.3"
+  },
+  "devDependencies": {
+    "nodemon": "^2.0.13",
+    "ts-node": "^10.2.1"
   }
 }
