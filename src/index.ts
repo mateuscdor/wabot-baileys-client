@@ -15,19 +15,17 @@ import {
 
 dotenv.config();
 
-// inisialisasi koneksi
-const conn = new WAConnection()
-conn.autoReconnect = ReconnectMode.onConnectionLost 
-conn.logger.level = 'error' 
-conn.connectOptions.maxRetries = 10
-
-fs.existsSync('./auth_info.json') && conn.loadAuthInfo ('./auth_info.json')
-
-conn.connect()
-const authInfo = conn.base64EncodedAuthInfo()
-fs.writeFileSync('./auth_info.json', JSON.stringify(authInfo, null, '\t'))
-
 async function index() {
+    const conn = new WAConnection()
+    conn.autoReconnect = ReconnectMode.onConnectionLost
+    conn.logger.level = 'debug'
+    conn.connectOptions.maxRetries = 10
+
+    fs.existsSync('./auth_info.json') && conn.loadAuthInfo ('./auth_info.json')
+    await conn.connect()
+    const authInfo = conn.base64EncodedAuthInfo()
+    fs.writeFileSync('./auth_info.json', JSON.stringify(authInfo, null, '\t'))
+
     const options: MessageOptions = { }
     const type = MessageType.text
     
