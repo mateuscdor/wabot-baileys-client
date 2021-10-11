@@ -38,6 +38,7 @@ export async function checkOutBox(conn) {
             const el = messages.data.data[i];
 
             const sender =el.sender+'@s.whatsapp.net'
+            const content =el.content
             
 
             if (el.type==='text'){
@@ -47,11 +48,14 @@ export async function checkOutBox(conn) {
                 const content =el.content 
 
                 const sent = await conn.sendMessage(sender, content, type, options)
-                console.log(`text message succesfully sent to ${sender}`)
+                console.log(`text message sent succesfully sent to ${sender}`)
                 updateStatus(el.id,2)
             }
             else if (el.type==='image'){
-                const options: MessageOptions = {}
+
+                const options: MessageOptions = {
+                    'caption': el.content
+                }
                 const type = MessageType.image
 
                 const content ={
@@ -59,13 +63,29 @@ export async function checkOutBox(conn) {
                 } 
 
                 const sent = await conn.sendMessage(sender, content, type, options)
-                console.log(`image message succesfully sent to ${sender}`)
+                console.log(`image message sent succesfully to ${sender}`)
+                updateStatus(el.id,2)
+            }
+
+            else if (el.type==='document'){
+
+                const opt = JSON.parse(el.options)
+                
+                const options: MessageOptions = opt
+                const type = MessageType.document
+
+                const content ={
+                    url: el.media
+                } 
+
+                const sent = await conn.sendMessage(sender, content, type, options)
+                console.log(`document message sent succesfully to ${sender}`)
                 updateStatus(el.id,2)
             }
 
         }
     }else{
-        console.log(`no message found`);
+        console.log(`check outbox: no message found`);
     }
 
     setTimeout(() => checkOutBox(conn), 5000);
