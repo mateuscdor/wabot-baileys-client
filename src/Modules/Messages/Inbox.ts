@@ -4,10 +4,17 @@ const axios = require('axios')
 import {
     MessageType,
     MessageOptions,
-    WA_MESSAGE_STUB_TYPES,
 } from '@adiwajshing/baileys'
 
-
+export async function getMessageFromTemplate(msg:string) {
+    let messages:any=[];
+    try {
+        messages = await axios.get(process.env.API_URL+'/message/template',{ params: { msg } });        
+    } catch (error) {
+        console.error(error);
+    }
+    return messages;
+}
 
 export async function checkInbox(conn, chat) {
     if(chat.imgUrl) {
@@ -23,9 +30,6 @@ export async function checkInbox(conn, chat) {
     } 
     
     const m = chat.messages.all()[0] // pull the new message from the update
-    const messageStubType = WA_MESSAGE_STUB_TYPES[m.messageStubType] ||  'MESSAGE'
-    console.log('got notification of type: ' + messageStubType)
-
     const messageContent = m.message
     // if it is not a regular text or media message
     if (!messageContent) return
@@ -46,15 +50,34 @@ export async function checkInbox(conn, chat) {
     }
 
     const text = m.message.conversation
+
     console.log(sender + ' sent: ' + text)
     
     await conn.chatRead(m.key.remoteJid) 
     const options: MessageOptions = { quoted: m }
-    let content
+    let content:string
     let type: MessageType
 
-    content = 'hello!' 
     type = MessageType.text
+    content = 'hello!'
+    
+    if (text.toLowerCase() ==='info'){
+        content = 'sender id: '+ sender
+    }else{
+        const getMessage:any = await getMessageFromTemplate(text.toLowerCase())
+        
+        if (!getMessage){
+            return false;
+        }
+        
+        if (getMessage.data.status=='error'){
+            console.log(getMessage.data);            
+            return false
+        }
+
+        content = getMessage.data.data.message
+    }
+
     
     const response = await conn.sendMessage(m.key.remoteJid, content, type, options)
     console.log("sent message with ID '" + response.key.id + "' successfully")
