@@ -24,7 +24,7 @@ async function index() {
     await conn.connect()
     const authInfo = conn.base64EncodedAuthInfo()
     fs.writeFileSync('./auth_info.json', JSON.stringify(authInfo, null, '\t'))
-    
+
     checkOutBox(conn)
 
     conn.on('chat-update', async chat => {
