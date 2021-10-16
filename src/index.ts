@@ -17,7 +17,7 @@ dotenv.config();
 async function index() {
     const conn = new WAConnection()
     conn.autoReconnect = ReconnectMode.onConnectionLost
-    conn.logger.level = 'debug'
+    // conn.logger.level = 'debug'
     conn.connectOptions.maxRetries = 10
 
     fs.existsSync('./auth_info.json') && conn.loadAuthInfo ('./auth_info.json')
@@ -25,7 +25,7 @@ async function index() {
     const authInfo = conn.base64EncodedAuthInfo()
     fs.writeFileSync('./auth_info.json', JSON.stringify(authInfo, null, '\t'))
 
-    // checkOutBox(conn)
+    checkOutBox(conn)
 
     conn.on('chat-update', async chat => {
         checkInbox(conn, chat)
