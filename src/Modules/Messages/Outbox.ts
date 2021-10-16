@@ -1,5 +1,6 @@
-
 const axios = require('axios')
+
+// axios.defaults.headers.common['token'] = process.env.API_TOKEN;
 
 import {
     MessageType,
@@ -9,7 +10,15 @@ import {
 export async function getOutbox () {
     let messages=[];
     try {
-        messages = await axios.get(process.env.API_URL+'/message/outbox');
+        const options = {
+            headers: {
+                token: process.env.API_TOKEN
+            }
+        }
+
+        messages = await axios.get(process.env.API_URL+'/message/outbox', options);
+        console.log(messages);
+        
     } catch (error) {
         console.error(error);
     }
@@ -20,7 +29,12 @@ export async function getOutbox () {
 export async function updateStatus (id: number, status:number) {
     let messages=[];
     try {
-        messages = await axios.put(process.env.API_URL+'/message/status-update/'+id,{status});
+        const options = {
+            headers: {
+                token: process.env.API_TOKEN
+            }
+        }
+        messages = await axios.put(process.env.API_URL+'/message/status-update/'+id,{status},options);
     } catch (error) {
         console.error(error);
     }

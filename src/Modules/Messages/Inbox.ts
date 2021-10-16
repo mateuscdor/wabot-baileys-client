@@ -9,11 +9,21 @@ import {
 export async function getMessageFromTemplate(msg:string) {
     let messages:any=[];
     try {
-        messages = await axios.get(process.env.API_URL+'/message/template',{ params: { msg } });        
+        const options = {
+            params: { 
+                msg 
+            },
+            headers: {
+                token: process.env.API_TOKEN
+            }
+        }
+
+        messages = await axios.get(process.env.API_URL+'/message/template',options); 
+        console.log(messages)
     } catch (error) {
-        console.error(error);
+        console.error(error)
     }
-    return messages;
+    return messages
 }
 
 export async function checkInbox(conn, chat) {
@@ -65,10 +75,10 @@ export async function checkInbox(conn, chat) {
         content = 'sender id: '+ sender
     }else{
         const getMessage:any = await getMessageFromTemplate(text.toLowerCase())
+
+        console.log(getMessage.data);
         
-        if (!getMessage){
-            return false;
-        }
+    
         
         if (getMessage.data.status=='error'){
             console.log(getMessage.data);            
