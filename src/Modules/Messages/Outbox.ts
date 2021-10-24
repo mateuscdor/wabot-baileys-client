@@ -17,7 +17,6 @@ export async function getOutbox () {
         }
 
         messages = await axios.get(process.env.API_URL+'/message/outbox', options);
-        console.log(messages);
         
     } catch (error) {
         console.error(error);
@@ -43,22 +42,24 @@ export async function updateStatus (id: number, status:number) {
 }
 
 export async function checkOutBox(conn) {
-    const messages:any = await getOutbox();
-    
+    let next:boolean = true;
+    const messages:any = await getOutbox();    
     if (messages.data.status=='success'){
-
         for (let i = 0; i < messages.data.data.length; i++) {
             const el = messages.data.data[i];
+            const sender = el.is_group === 1 ? el.sender : el.sender+'@s.whatsapp.net'
+            if (el.is_group === 0) {
+                const exists = await conn.isOnWhatsApp(el.sender)
+                if (!exists) {
+                    console.log (`${el.sender} not exists on WhatsApp`)
+                    updateStatus(el.id,2)
+                    next = false
+                }else{
+                    const sender = el.sender+'@s.whatsapp.net'
+                }
+            }
 
-            // check contact exists
-            const exists = await conn.isOnWhatsApp(el.sender)
-            if (!exists) {
-                console.log (`${el.sender} not exists on WhatsApp`)
-            }else{
-                const sender =el.sender+'@s.whatsapp.net'
-                const content =el.content
-                
-    
+            if (next===true){
                 if (el.type==='text'){
     
                     const options: MessageOptions = { }
@@ -84,29 +85,25 @@ export async function checkOutBox(conn) {
                     console.log(`image message sent succesfully to ${sender}`)
                     updateStatus(el.id,2)
                 }
-    
                 else if (el.type==='document'){
     
                     const opt = JSON.parse(el.options)
-                    
                     const options: MessageOptions = opt
                     const type = MessageType.document
     
                     const content ={
                         url: el.media
-                    } 
+                    }
     
                     const sent = await conn.sendMessage(sender, content, type, options)
                     console.log(`document message sent succesfully to ${sender}`)
                     updateStatus(el.id,2)
                 }
             }
-
-
         }
     }else{
         console.log(`check outbox: no message found`);
     }
 
-    setTimeout(() => checkOutBox(conn), 5000);
+    setTimeout(() => checkOutBox(conn), 5000)
 }

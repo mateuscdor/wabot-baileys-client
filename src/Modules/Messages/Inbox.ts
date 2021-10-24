@@ -26,7 +26,28 @@ export async function getMessageFromTemplate(msg:string) {
     return messages
 }
 
+export async function checkMessage(sender:string, type:string, input:string, desc:string) {
+    let messages:any=[];
+    try {
+        const options = {
+            headers: {
+                token: process.env.API_TOKEN
+            }
+        }
+        
+
+        messages = await axios.get(process.env.API_URL+'/message/check-message',
+        { sender,type,input,desc},
+        options); 
+        console.log(messages);        
+    } catch (error) {
+        console.error(error)
+    }
+    return messages
+}
+
 export async function checkInbox(conn, chat) {
+    
     if(chat.imgUrl) {
         console.log('imgUrl of chat changed ', chat.imgUrl)
         return
@@ -50,6 +71,11 @@ export async function checkInbox(conn, chat) {
     }
 
     let sender = m.key.remoteJid
+    let user = conn.contacts[sender]
+    
+
+    
+
     if (m.key.participant) {
         // participant exists if the message is in a group
         sender += ' (' + m.key.participant + ')'
@@ -69,25 +95,32 @@ export async function checkInbox(conn, chat) {
     let type: MessageType
 
     type = MessageType.text
-    content = 'hello!'
+    content = 'content not set'
     
     if (text.toLowerCase() ==='info'){
         content = 'sender id: '+ sender
     }else{
-        const getMessage:any = await getMessageFromTemplate(text.toLowerCase())
+        return false
+        const desc = JSON.stringify({user})
+        // const chekMessage:any = await checkMessage(sender,type,text,desc)
 
-        console.log(getMessage.data);
-        
-    
-        
-        if (getMessage.data.status=='error'){
-            console.log(getMessage.data);            
-            return false
-        }
+        // if (chekMessage.data.status=='success'){
+        //     content = chekMessage.data.data.message
+        //     console.log(content);
+        // }else{
+        //     const getMessage:any = await getMessageFromTemplate(text.toLowerCase())
 
-        content = getMessage.data.data.message
+        //     if (getMessage.data.status=='error'){
+        //         console.log(getMessage.data);            
+        //         return false
+        //     }
+
+        //     content = getMessage.data.data.message
+        // }
+
+
+
     }
-
     
     const response = await conn.sendMessage(m.key.remoteJid, content, type, options)
     console.log("sent message with ID '" + response.key.id + "' successfully")
