@@ -6,7 +6,7 @@ output.csv
 .env
 browser-messages.json
 decoded-ws.json
-lib
+dist
 docs
 browser-token.json
 Proxy
