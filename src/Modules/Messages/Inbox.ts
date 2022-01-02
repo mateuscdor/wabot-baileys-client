@@ -4,6 +4,7 @@ const axios = require('axios')
 import {
     MessageType,
     MessageOptions,
+    WALocationMessage,
 } from '@adiwajshing/baileys'
 
 export async function getMessageFromTemplate(msg:string) {
@@ -81,48 +82,47 @@ export async function checkInbox(conn, chat) {
         sender += ' (' + m.key.participant + ')'
     }
     const messageType = Object.keys (messageContent)[0] // message will always contain one key signifying what kind of message
-    if (messageType !== MessageType.text) {
+
+    if (messageType === MessageType.location || messageType === MessageType.liveLocation) {
+        const locMessage = m.message[messageType] as WALocationMessage
+        console.log(`${sender} sent location (lat: ${locMessage.degreesLatitude}, long: ${locMessage.degreesLongitude})`)
+    }else if (messageType === MessageType.text) {
+        const text = m.message.conversation
+        console.log(sender + ' sent: ' + text)        
+        await conn.chatRead(m.key.remoteJid) 
+        const options: MessageOptions = { quoted: m }
+        let content:string
+        let type: MessageType
+
+        type = MessageType.text
+        content = 'content not set'
+        
+        if (text.toLowerCase() ==='info'){
+            content = 'sender id: '+ sender
+        }else{
+            return false
+            const desc = JSON.stringify({user})
+            // const chekMessage:any = await checkMessage(sender,type,text,desc)
+
+            // if (chekMessage.data.status=='success'){
+            //     content = chekMessage.data.data.message
+            //     console.log(content);
+            // }else{
+            //     const getMessage:any = await getMessageFromTemplate(text.toLowerCase())
+
+            //     if (getMessage.data.status=='error'){
+            //         console.log(getMessage.data);            
+            //         return false
+            //     }
+
+            //     content = getMessage.data.data.message
+            // }
+        }
+        
+        const response = await conn.sendMessage(m.key.remoteJid, content, type, options)
+        console.log("sent message with ID '" + response.key.id + "' successfully")
+    }else{
+        console.log(messageType)        
         return
     }
-
-    const text = m.message.conversation
-
-    console.log(sender + ' sent: ' + text)
-    
-    await conn.chatRead(m.key.remoteJid) 
-    const options: MessageOptions = { quoted: m }
-    let content:string
-    let type: MessageType
-
-    type = MessageType.text
-    content = 'content not set'
-    
-    if (text.toLowerCase() ==='info'){
-        content = 'sender id: '+ sender
-    }else{
-        return false
-        const desc = JSON.stringify({user})
-        // const chekMessage:any = await checkMessage(sender,type,text,desc)
-
-        // if (chekMessage.data.status=='success'){
-        //     content = chekMessage.data.data.message
-        //     console.log(content);
-        // }else{
-        //     const getMessage:any = await getMessageFromTemplate(text.toLowerCase())
-
-        //     if (getMessage.data.status=='error'){
-        //         console.log(getMessage.data);            
-        //         return false
-        //     }
-
-        //     content = getMessage.data.data.message
-        // }
-
-
-
-    }
-    
-    const response = await conn.sendMessage(m.key.remoteJid, content, type, options)
-    console.log("sent message with ID '" + response.key.id + "' successfully")
-
 }
