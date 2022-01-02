@@ -9,7 +9,7 @@ import {
     ReconnectMode,
     ProxyAgent,
     waChatKey,
-} from '../src/WAConnection'
+} from '@adiwajshing/baileys'
 import * as fs from 'fs'
 
 async function example() {
