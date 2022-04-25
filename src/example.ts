@@ -1,6 +1,6 @@
 import { Boom } from '@hapi/boom'
 import P from 'pino'
-import makeWASocket, { AnyMessageContent, delay, DisconnectReason, makeInMemoryStore, useSingleFileAuthState } from '@adiwajshing/baileys/src'
+import makeWASocket, { AnyMessageContent, delay, DisconnectReason, makeInMemoryStore, useSingleFileAuthState } from '@adiwajshing/baileys'
 
 // the store maintains the data of the WA connection in memory
 // can be written out to a file & read from it
