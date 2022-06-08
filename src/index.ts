@@ -6,8 +6,8 @@ import P from 'pino'
 import makeWASocket, { AnyMessageContent, delay, DisconnectReason, makeInMemoryStore, useSingleFileAuthState } from '@adiwajshing/baileys'
 
 import {
-    checkOutBox, 
-    checkInbox, 
+    checkOutBox,
+    checkInbox,
 } from './Modules/Messages'
 
 dotenv.config();
@@ -27,9 +27,9 @@ async function startSock() {
 		const msg = m.messages[0]
         console.log(JSON.stringify(m))
         
-		if(!msg.key.fromMe && m.type === 'notify') {
-			//await sock!.sendReadReceipt(msg.key.remoteJid, msg.key.participant, [msg.key.id])
-			await sock.sendMessage(msg.key.remoteJid, { text: 'Hello there!' })
+		if(!msg.key.fromMe && m.type === 'notify') {			
+			checkInbox(sock, m)
+			// await sock.sendMessage(msg.key.remoteJid, { text: 'Hello there!' })
 		}
         
 	})
@@ -47,21 +47,11 @@ async function startSock() {
         
 		console.log('connection update', update)
 	})
-
-    // await sock.sendMessage('6282333335995@s.whatsapp.net', { text: 'test notif' });
-
-    
-
 	
-    
-    
-    // checkOutBox(conn)    
-    
-    // conn.on('chat-update', async chat => {
-    //     checkInbox(conn, chat)
-    // })    
-    
-    // listen for when the auth credentials is updated
+	setTimeout(() => {
+		checkOutBox(sock)
+	}, 10000);
+
 
     sock.ev.on('creds.update', saveState)
 

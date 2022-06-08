@@ -1,11 +1,6 @@
 
 const axios = require('axios')
 
-import {
-    MessageType,
-    MessageOptions,
-    WALocationMessage,
-} from '@adiwajshing/baileys'
 
 export async function getMessageFromTemplate(msg:string) {
     let messages:any=[];
@@ -47,21 +42,8 @@ export async function checkMessage(sender:string, type:string, input:string, des
     return messages
 }
 
-export async function checkInbox(conn, chat) {
-    
-    if(chat.imgUrl) {
-        console.log('imgUrl of chat changed ', chat.imgUrl)
-        return
-    }
-    // only do something when a new message is received
-    if (!chat.hasNewMessage) {
-        if(chat.messages) {
-            console.log('updated message: ', chat.messages.first)
-        }
-        return
-    } 
-    
-    const m = chat.messages.all()[0] // pull the new message from the update
+export async function checkInbox(sock, chat) {
+    const m = chat.messages[0];
     const messageContent = m.message
     // if it is not a regular text or media message
     if (!messageContent) return
@@ -71,58 +53,18 @@ export async function checkInbox(conn, chat) {
         return
     }
 
-    let sender = m.key.remoteJid
-    let user = conn.contacts[sender]
+    const sender = m.key.remoteJid
+    const user = m.pushName
+    const messageType = Object.keys(messageContent)[0]
+    console.log({messageType});
     
-
-    
-
-    if (m.key.participant) {
-        // participant exists if the message is in a group
-        sender += ' (' + m.key.participant + ')'
-    }
-    const messageType = Object.keys (messageContent)[0] // message will always contain one key signifying what kind of message
-
-    if (messageType === MessageType.location || messageType === MessageType.liveLocation) {
-        const locMessage = m.message[messageType] as WALocationMessage
-        console.log(`${sender} sent location (lat: ${locMessage.degreesLatitude}, long: ${locMessage.degreesLongitude})`)
-    }else if (messageType === MessageType.text) {
-        const text = m.message.conversation
-        console.log(sender + ' sent: ' + text)        
-        await conn.chatRead(m.key.remoteJid) 
-        const options: MessageOptions = { quoted: m }
-        let content:string
-        let type: MessageType
-
-        type = MessageType.text
-        content = 'content not set'
+    if (messageType === 'conversation') {
+        const text = messageContent.conversation
+        let content='';
         
         if (text.toLowerCase() ==='info'){
-            content = 'sender id: '+ sender
-        }else{
-            return false
-            const desc = JSON.stringify({user})
-            // const chekMessage:any = await checkMessage(sender,type,text,desc)
-
-            // if (chekMessage.data.status=='success'){
-            //     content = chekMessage.data.data.message
-            //     console.log(content);
-            // }else{
-            //     const getMessage:any = await getMessageFromTemplate(text.toLowerCase())
-
-            //     if (getMessage.data.status=='error'){
-            //         console.log(getMessage.data);            
-            //         return false
-            //     }
-
-            //     content = getMessage.data.data.message
-            // }
+            content = `sender id: ${sender}, name: ${user}`
+            await sock.sendMessage(sender, { text: content })
         }
-        
-        const response = await conn.sendMessage(m.key.remoteJid, content, type, options)
-        console.log("sent message with ID '" + response.key.id + "' successfully")
-    }else{
-        console.log(messageType)        
-        return
     }
 }
