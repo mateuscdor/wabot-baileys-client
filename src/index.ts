@@ -16,12 +16,24 @@ dotenv.config();
 const { state, saveState } = useSingleFileAuthState('./auth_info_multi.json')
 
 async function startSock() {
+	// can be written out to a file & read from it
+	const store = makeInMemoryStore({})
+	// can be read from a file
+	store.readFromFile('./baileys_store.json')
+	// saves the state to a file every 10s
+	setInterval(() => {
+		store.writeToFile('./baileys_store.json')
+	}, 10_000)
     
-    const sock = makeWASocket({
+	const sock = makeWASocket({
 		logger: P({ level: 'error' }),
 		printQRInTerminal: true,
 		auth: state,
 	})
+
+	// will listen from this socket
+	// the store can listen from a new socket once the current socket outlives its lifetime
+	store.bind(sock.ev)
 
 	sock.ev.on('messages.upsert', async m => {        
 		const msg = m.messages[0]

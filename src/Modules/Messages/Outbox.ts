@@ -1,9 +1,5 @@
 const axios = require('axios')
 
-import * as fs from 'fs'
-
-// axios.defaults.headers.common['token'] = process.env.API_TOKEN;
-
 export async function getOutbox () {
     let messages=[];
     try {
@@ -65,14 +61,10 @@ export async function checkOutBox(sock) {
                     updateStatus(el.id,2)
                 }
                 else if (el.type==='image'){
-                    
-                    let image = await axios.get(el.media, { responseType: 'arraybuffer' });
-                    let returnedB64 = Buffer.from(image.data).toString('base64');
 
                     const sent = await sock.sendMessage(sender, {
                         image: { url: el.media },
-                        caption: el.content,
-                        jpegThumbnail: returnedB64
+                        caption: el.content
                     })
                     console.log(`image message sent succesfully to ${sender}`)
                     updateStatus(el.id,2)
