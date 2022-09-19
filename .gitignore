@@ -12,3 +12,5 @@ browser-token.json
 Proxy
 messages*.json
 baileys_store.json
+package-lock.json
+yarn.lock
